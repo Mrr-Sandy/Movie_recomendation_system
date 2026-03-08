@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineMatch Movie Details</title>
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+  </head>
+  <body class="movie-detail-page">
+    <header class="navbar">
+      <div class="container navbar-inner">
+        <a class="logo" href="/dashboard.html">&#127916; <span>CineMatch</span></a>
+        <div></div>
+        <div class="user-menu">
+          <button class="btn btn-secondary" id="backToDashboard">&#8592; Back to Dashboard</button>
+        </div>
+      </div>
+    </header>
+
+    <section id="movieHero" class="hero skeleton">
+      <div class="hero-content">
+        <h1>Loading...</h1>
+      </div>
+    </section>
+
+    <main class="container movie-detail-main">
+      <section class="panel trailer-section">
+        <h2 class="section-title">Trailer</h2>
+        <div id="primaryTrailerWrap" class="fade-in">
+          <iframe
+            id="primaryTrailerFrame"
+            class="video-frame hidden"
+            src=""
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="Primary trailer"
+          ></iframe>
+          <div id="noTrailerMessage" class="empty-state hidden">No trailer available</div>
+        </div>
+        <div id="trailerList" class="trailer-list"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Movie Information</h2>
+        <div id="movieInfoGrid" class="info-grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Cast</h2>
+        <div id="castRow" class="horizontal-row"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="section-title">Similar Movies</h2>
+        <div id="similarRow" class="horizontal-row"></div>
+      </section>
+    </main>
+
+    <div id="trailerModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTrailerTitle">Trailer</h3>
+          <button class="modal-close" id="closeTrailerModal" aria-label="Close trailer">&times;</button>
+        </div>
+        <div class="modal-body">
+          <iframe
+            id="modalTrailerFrame"
+            class="video-frame"
+            src=""
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="Trailer modal"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script type="module" src="./js/movie.js"></script>
+  </body>
+</html>

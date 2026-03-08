@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineMatch | Smart Movie Recommendations</title>
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/auth.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-layout">
+      <section class="auth-visual">
+        <div class="poster-cloud" aria-hidden="true">
+          <span class="poster-chip">Inception</span>
+          <span class="poster-chip">The Godfather</span>
+          <span class="poster-chip">Parasite</span>
+          <span class="poster-chip">Interstellar</span>
+          <span class="poster-chip">Whiplash</span>
+        </div>
+        <h1>CineMatch Finds Your Next Favorite Film</h1>
+        <p>
+          Smart recommendations powered by your mood, watch behavior, and high-signal ratings.
+          Sign in to discover trailers, cast details, and personalized picks in seconds.
+        </p>
+      </section>
+
+      <section class="auth-panel">
+        <div class="auth-card">
+          <div class="auth-brand">&#127916; <span>CineMatch</span></div>
+
+          <div class="auth-switch" role="tablist" aria-label="Authentication Mode">
+            <button class="switch-btn active" data-target="login" role="tab" aria-selected="true">
+              Login
+            </button>
+            <button class="switch-btn" data-target="signup" role="tab" aria-selected="false">
+              Sign Up
+            </button>
+          </div>
+
+          <form id="loginForm" class="auth-form active" novalidate>
+            <div class="field-group">
+              <label for="loginEmail">Email</label>
+              <input id="loginEmail" name="email" type="email" autocomplete="email" required />
+              <small class="field-error" id="loginEmailError"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="loginPassword">Password</label>
+              <div class="password-wrap">
+                <input
+                  id="loginPassword"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                />
+                <button class="password-toggle" type="button" data-target="loginPassword">Show</button>
+              </div>
+              <small class="field-error" id="loginPasswordError"></small>
+            </div>
+
+            <div class="form-row">
+              <label class="remember-row">
+                <input id="rememberMe" type="checkbox" checked /> Remember Me
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit" id="loginSubmit">
+              <span class="btn-text">Login</span>
+            </button>
+          </form>
+
+          <form id="signupForm" class="auth-form" novalidate>
+            <div class="field-group">
+              <label for="signupUsername">Username</label>
+              <input id="signupUsername" name="username" type="text" autocomplete="username" required />
+              <small class="field-error" id="signupUsernameError"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="signupEmail">Email</label>
+              <input id="signupEmail" name="email" type="email" autocomplete="email" required />
+              <small class="field-error" id="signupEmailError"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="signupPassword">Password</label>
+              <div class="password-wrap">
+                <input
+                  id="signupPassword"
+                  name="password"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                />
+                <button class="password-toggle" type="button" data-target="signupPassword">Show</button>
+              </div>
+              <div class="password-strength" id="passwordStrength">Strength: -</div>
+              <small class="field-error" id="signupPasswordError"></small>
+            </div>
+
+            <div class="field-group">
+              <label for="confirmPassword">Confirm Password</label>
+              <div class="password-wrap">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                />
+                <button class="password-toggle" type="button" data-target="confirmPassword">Show</button>
+              </div>
+              <small class="field-error" id="confirmPasswordError"></small>
+            </div>
+
+            <button type="submit" class="btn btn-primary auth-submit" id="signupSubmit">
+              <span class="btn-text">Create Account</span>
+            </button>
+          </form>
+
+          <p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script type="module" src="./js/auth.js"></script>
+  </body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineMatch Dashboard</title>
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="container navbar-inner">
+        <a class="logo" href="/dashboard.html">&#127916; <span>CineMatch</span></a>
+
+        <label class="search-wrap" for="searchInput">
+          <span aria-hidden="true">&#128269;</span>
+          <input id="searchInput" type="search" placeholder="Search movies, genres, titles..." />
+        </label>
+
+        <div class="user-menu" id="userMenu">
+          <button class="user-toggle" id="userToggle" aria-expanded="false">
+            <span class="avatar" id="userAvatar">U</span>
+            <span id="userName">Guest</span>
+          </button>
+          <div class="dropdown-menu hidden" id="userDropdown">
+            <button id="profileBtn" type="button">Profile</button>
+            <button id="historyBtn" type="button">History</button>
+            <button id="logoutBtn" type="button">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-main">
+      <section id="heroSection" class="hero skeleton">
+        <div class="hero-content">
+          <h1>Loading...</h1>
+        </div>
+      </section>
+
+      <section class="container tabs-shell">
+        <nav class="tabs-nav" id="tabsNav">
+          <button class="tab-btn active" data-tab="moodTab">&#127917; Mood Based</button>
+          <button class="tab-btn" data-tab="friendsTab">&#128101; Friend Picks</button>
+          <button class="tab-btn" data-tab="topRatedTab">&#11088; Top Rated</button>
+          <button class="tab-btn" data-tab="quickWatchTab">&#9201; Quick Watch</button>
+          <button class="tab-btn" data-tab="trendingTab">&#128101; Trending Now</button>
+          <button class="tab-btn" data-tab="searchTab">&#128269; Search Results</button>
+        </nav>
+
+        <div class="tab-panels">
+          <section class="tab-panel active panel" id="moodTab">
+            <h2 class="section-title">Mood Based Picks</h2>
+            <p class="text-muted">Pick a mood and get personalized recommendations instantly.</p>
+            <div id="moodButtons" class="mood-grid"></div>
+            <div id="moodGrid" class="movie-grid"></div>
+          </section>
+
+          <section class="tab-panel panel" id="friendsTab">
+            <h2 class="section-title">Friend Picks</h2>
+            <p class="text-muted" id="friendSummary">
+              Add friends by username or email and get movies they watched before you.
+            </p>
+            <form class="friend-form" id="friendForm">
+              <input
+                id="friendIdentifier"
+                type="text"
+                placeholder="Enter friend's username or email"
+                autocomplete="off"
+              />
+              <button class="btn btn-primary" id="addFriendBtn" type="submit">Add Friend</button>
+            </form>
+            <div id="friendList" class="friend-list"></div>
+            <div id="friendInsights" class="friend-insights"></div>
+            <div id="friendGrid" class="movie-grid"></div>
+          </section>
+
+          <section class="tab-panel panel" id="topRatedTab">
+            <h2 class="section-title">Top Rated Collection</h2>
+            <p class="text-muted">Filter world-class movies by era and recognition.</p>
+            <div class="filter-row" id="topRatedFilters">
+              <button class="filter-chip active" data-filter="all">All</button>
+              <button class="filter-chip" data-filter="year">This Year</button>
+              <button class="filter-chip" data-filter="all-time">All Time</button>
+              <button class="filter-chip" data-filter="awards">Award Winners</button>
+            </div>
+            <div id="topRatedGrid" class="movie-grid"></div>
+          </section>
+
+          <section class="tab-panel panel" id="quickWatchTab">
+            <h2 class="section-title">Quick Watch</h2>
+            <p class="text-muted">Slide your max runtime and find short, high-quality picks.</p>
+            <div class="quick-watch-controls">
+              <input id="runtimeSlider" type="range" min="60" max="180" value="120" step="5" />
+              <div class="quick-watch-value" id="runtimeValue">Max Runtime: 120 min</div>
+              <div class="quick-watch-value" id="quickMatchCount">Matching Movies: 0</div>
+            </div>
+            <div id="quickWatchGrid" class="movie-grid"></div>
+          </section>
+
+          <section class="tab-panel panel" id="trendingTab">
+            <h2 class="section-title">Trending This Week</h2>
+            <p class="text-muted">What everyone is watching right now.</p>
+            <div id="trendingGrid" class="movie-grid"></div>
+          </section>
+
+          <section class="tab-panel panel" id="searchTab">
+            <h2 class="section-title">Search Results</h2>
+            <p class="text-muted" id="searchSummary">Start typing in the search bar to find movies.</p>
+            <div id="searchGrid" class="movie-grid"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="trailerModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalMovieTitle">Trailer</h3>
+          <button class="modal-close" id="closeTrailerModal" aria-label="Close trailer">&times;</button>
+        </div>
+        <div class="modal-body">
+          <iframe
+            id="trailerFrame"
+            class="video-frame"
+            src=""
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="Trailer player"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div id="onboardingModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>What genres do you love?</h3>
+          <button class="modal-close" id="skipOnboarding" aria-label="Skip onboarding">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="onboarding-copy">
+            Select your favorite genres and CineMatch will improve your recommendations.
+          </p>
+          <div class="checkbox-grid" id="genreOptions"></div>
+          <div class="onboarding-actions">
+            <button class="btn btn-primary" id="savePreferencesBtn">Save Preferences</button>
+            <button class="btn btn-secondary" id="dismissPreferencesBtn">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="historyModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Watch History</h3>
+          <button class="modal-close" id="closeHistoryModal" aria-label="Close history">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script type="module" src="./js/dashboard.js"></script>
+  </body>
+</html>
