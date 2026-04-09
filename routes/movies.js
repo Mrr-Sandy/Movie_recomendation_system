@@ -3,10 +3,11 @@ const fetch = require("node-fetch");
 const auth = require("../middleware/auth");
 const User = require("../models/User");
 const WatchHistory = require("../models/WatchHistory");
+const { connectToDatabase } = require("../lib/database");
+const { createConfigError, isMissingOrPlaceholder } = require("../lib/env");
 
 const router = express.Router();
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || process.env.X_RAPIDAPI_KEY;
 const RAPIDAPI_HOST = process.env.RAPIDAPI_HOST || "netflix54.p.rapidapi.com";
 const RAPIDAPI_BASE_URL = (
   process.env.RAPIDAPI_BASE_URL || `https://${RAPIDAPI_HOST}`
@@ -179,11 +180,24 @@ const uniqById = (items) => {
   return [...seen.values()];
 };
 
-const rapidRequest = async (path, query = {}) => {
-  if (!RAPIDAPI_KEY) {
-    throw new Error("RAPIDAPI_KEY is missing in environment variables");
+const getRapidApiKey = () => {
+  const preferredKey = process.env.RAPIDAPI_KEY;
+  const fallbackKey = process.env.X_RAPIDAPI_KEY;
+
+  if (!isMissingOrPlaceholder(preferredKey)) {
+    return preferredKey;
   }
 
+  if (!isMissingOrPlaceholder(fallbackKey)) {
+    return fallbackKey;
+  }
+
+  throw createConfigError(
+    "RAPIDAPI_KEY is missing or still a placeholder in environment variables."
+  );
+};
+
+const rapidRequest = async (path, query = {}) => {
   const url = new URL(`${RAPIDAPI_BASE_URL}${path}`);
   Object.entries(query).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -194,7 +208,7 @@ const rapidRequest = async (path, query = {}) => {
   const response = await fetch(url.toString(), {
     headers: {
       "x-rapidapi-host": RAPIDAPI_HOST,
-      "x-rapidapi-key": RAPIDAPI_KEY,
+      "x-rapidapi-key": getRapidApiKey(),
     },
   });
 
@@ -288,6 +302,18 @@ const toPageResult = (results) => ({
   total_results: results.length,
 });
 
+const sendRouteError = (res, error, statusCode, fallbackMessage, logLabel) => {
+  if (error.code === "CONFIG_ERROR") {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    console.error(`${logLabel}:`, error.message);
+  }
+
+  return res.status(statusCode).json({ message: fallbackMessage });
+};
+
 router.get("/netflix/season-episodes", async (req, res) => {
   try {
     const ids = sanitizeText(req.query.ids || DEFAULT_SEASON_IDS.join(","))
@@ -307,10 +333,13 @@ router.get("/netflix/season-episodes", async (req, res) => {
       totalResults: data.episodes.length,
     });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Netflix season episodes fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch season episodes from RapidAPI" });
+    return sendRouteError(
+      res,
+      error,
+      502,
+      "Failed to fetch season episodes from RapidAPI",
+      "Netflix season episodes fetch error"
+    );
   }
 });
 
@@ -326,10 +355,7 @@ router.get("/trending", async (req, res) => {
     const results = withSortFallback(data.episodes);
     return res.json(toPageResult(results));
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Trending fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch trending content" });
+    return sendRouteError(res, error, 502, "Failed to fetch trending content", "Trending fetch error");
   }
 });
 
@@ -348,10 +374,7 @@ router.get("/popular", async (req, res) => {
 
     return res.json(toPageResult(results));
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Popular fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch popular content" });
+    return sendRouteError(res, error, 502, "Failed to fetch popular content", "Popular fetch error");
   }
 });
 
@@ -370,10 +393,7 @@ router.get("/top-rated", async (req, res) => {
 
     return res.json(toPageResult(results));
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Top rated fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch top-rated content" });
+    return sendRouteError(res, error, 502, "Failed to fetch top-rated content", "Top rated fetch error");
   }
 });
 
@@ -386,10 +406,7 @@ router.get("/genres", async (_req, res) => {
 
     return res.json({ genres });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Genres fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch genres" });
+    return sendRouteError(res, error, 502, "Failed to fetch genres", "Genres fetch error");
   }
 });
 
@@ -414,10 +431,7 @@ router.get("/search", async (req, res) => {
 
     return res.json(toPageResult(results));
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Search fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to search content" });
+    return sendRouteError(res, error, 502, "Failed to search content", "Search fetch error");
   }
 });
 
@@ -515,15 +529,20 @@ router.get("/recommend", async (req, res) => {
       appliedMaxRuntime: Number.isFinite(maxRuntime) ? maxRuntime : null,
     });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Recommend fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch recommendations" });
+    return sendRouteError(
+      res,
+      error,
+      502,
+      "Failed to fetch recommendations",
+      "Recommend fetch error"
+    );
   }
 });
 
 router.get("/recommend/friends", auth, async (req, res) => {
   try {
+    await connectToDatabase();
+
     const currentUser = await User.findById(req.userId).select("friends");
     if (!currentUser) {
       return res.status(404).json({ message: "User not found" });
@@ -657,10 +676,13 @@ router.get("/recommend/friends", auth, async (req, res) => {
         })),
     });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Friend recommendations fetch error:", error.message);
-    }
-    return res.status(500).json({ message: "Failed to fetch friend recommendations" });
+    return sendRouteError(
+      res,
+      error,
+      500,
+      "Failed to fetch friend recommendations",
+      "Friend recommendations fetch error"
+    );
   }
 });
 
@@ -709,10 +731,7 @@ router.get("/:id", async (req, res) => {
       original_language: "en",
     });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Movie details fetch error:", error.message);
-    }
-    return res.status(502).json({ message: "Failed to fetch movie details" });
+    return sendRouteError(res, error, 502, "Failed to fetch movie details", "Movie details fetch error");
   }
 });
 

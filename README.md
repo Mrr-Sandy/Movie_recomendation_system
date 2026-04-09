@@ -31,6 +31,31 @@ CineMatch is a full-stack movie recommendation platform built with Node.js, Expr
 6. Open:
    http://localhost:5000
 
+## Vercel Deployment
+
+This project now uses the Vercel-friendly Express pattern with [`api/index.js`](./api/index.js) and [`vercel.json`](./vercel.json).
+
+Before deploying, add these Environment Variables in your Vercel project settings:
+
+```env
+MONGODB_URI=your_mongodb_atlas_uri
+JWT_SECRET=your_strong_jwt_secret
+RAPIDAPI_KEY=your_rapidapi_key
+RAPIDAPI_HOST=netflix54.p.rapidapi.com
+RAPIDAPI_BASE_URL=https://netflix54.p.rapidapi.com
+NETFLIX_DEFAULT_IDS=80077209,80117715
+DOMAIN_URL=https://your-project-name.vercel.app
+CLIENT_URL=https://your-project-name.vercel.app
+DB_CONNECT_TIMEOUT_MS=10000
+NODE_ENV=production
+```
+
+Important checks for Vercel:
+
+- `MONGODB_URI`, `JWT_SECRET`, and `RAPIDAPI_KEY` must be set, otherwise the API will fail.
+- Make sure your MongoDB Atlas network access allows connections from Vercel.
+- After changing environment variables, redeploy the project.
+
 ## Environment Variables
 
 ```env

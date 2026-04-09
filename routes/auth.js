@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const auth = require("../middleware/auth");
+const { getRequiredEnv } = require("../lib/env");
 
 const router = express.Router();
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -11,7 +12,7 @@ const sanitizeText = (value) => String(value || "").trim().replace(/[<>$]/g, "")
 const sanitizeEmail = (value) => sanitizeText(value).toLowerCase();
 
 const createToken = (userId) =>
-  jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  jwt.sign({ userId }, getRequiredEnv("JWT_SECRET"), { expiresIn: "7d" });
 
 router.post("/register", async (req, res) => {
   try {
@@ -54,6 +55,10 @@ router.post("/register", async (req, res) => {
 
     return res.status(201).json({ token, user: user.toJSON() });
   } catch (error) {
+    if (error.code === "CONFIG_ERROR") {
+      return res.status(error.statusCode || 500).json({ message: error.message });
+    }
+
     if (process.env.NODE_ENV !== "production") {
       console.error("Register error:", error);
     }
@@ -88,6 +93,10 @@ router.post("/login", async (req, res) => {
 
     return res.json({ token, user: user.toJSON() });
   } catch (error) {
+    if (error.code === "CONFIG_ERROR") {
+      return res.status(error.statusCode || 500).json({ message: error.message });
+    }
+
     if (process.env.NODE_ENV !== "production") {
       console.error("Login error:", error);
     }
