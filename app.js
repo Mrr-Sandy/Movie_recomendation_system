@@ -9,6 +9,7 @@ const { connectToDatabase } = require("./lib/database");
 dotenv.config();
 
 const app = express();
+const isVercel = Boolean(process.env.VERCEL);
 
 const allowedOrigins = [
   "http://localhost:5000",
@@ -73,19 +74,27 @@ app.use("/api/auth", authLimiter, requireDatabase, require("./routes/auth"));
 app.use("/api/movies", require("./routes/movies"));
 app.use("/api/user", requireDatabase, require("./routes/user"));
 
-app.use(express.static(path.join(__dirname, "public")));
+if (!isVercel) {
+  app.use(express.static(path.join(__dirname, "public")));
+}
 
 app.get("/", (_req, res) => {
-  res.redirect("/index.html");
+  if (isVercel) {
+    return res.redirect("/index.html");
+  }
+
+  return res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.get("/dashboard.html", (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "dashboard.html"));
-});
+if (!isVercel) {
+  app.get("/dashboard.html", (_req, res) => {
+    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+  });
 
-app.get("/movie.html", (_req, res) => {
-  res.sendFile(path.join(__dirname, "public", "movie.html"));
-});
+  app.get("/movie.html", (_req, res) => {
+    res.sendFile(path.join(__dirname, "public", "movie.html"));
+  });
+}
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.originalUrl}` });
