@@ -12,6 +12,16 @@ const startServer = async () => {
 
 if (require.main === module) {
   startServer().catch((error) => {
+    if (
+      (error.name === "MongoServerError" && error.code === 18) ||
+      /bad auth|authentication failed/i.test(error.message)
+    ) {
+      console.error(
+        "Server startup failed: MongoDB authentication failed. Check MONGODB_URI credentials and ensure the Atlas database user has access."
+      );
+      process.exit(1);
+    }
+
     console.error(`Server startup failed: ${error.message}`);
     process.exit(1);
   });
